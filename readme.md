@@ -11,8 +11,8 @@ Currently, the renderer supports the creation of multiple canvases which can be 
 **Creating a renderer, canvas and drawing a rectangle.**
 ` let renderer = new PixelRenderer(160, 128)
 let canvas = new Canvas(0, 0, 160, 128)
-renderer.addCanvas(canvas) 
-canvas.drawer.drawRect(0, 0, 10, 10, "2")
+renderer.addCanvas(0, 0, canvas) 
+canvas.drawRect(0, 0, 10, 10, "2")
 renderer.renderFrame() `
 
 **Creating a renderer, canvas and drawing a sprite.**
@@ -21,7 +21,7 @@ spriteOneRGB = [164, 255, 0, 164, 255, 0 ...]
 
 let renderer = new PixelRenderer(160, 128)
 let canvas = new Canvas(0, 0, 160, 128)
-renderer.addCanvas(canvas)
+renderer.addCanvas(0, 0, canvas)
 
 let spriteOne = new Sprite(spriteOneRGB, 64, 64)
 canvas.drawer.drawSprite(0, 0, spriteOne)
@@ -37,14 +37,23 @@ Main object which controls frame-by-frame rendering processes to the screen.
 
 
 ## Canvas
-A canvas represents a drawable window within the renderer. A forward pass is performed which maps each pixel drawn using the canvas' local pixel coordinates to the global coordinates of the screen. This is performed using an affine transformation matrices, and the canvas is able to be scaled by changing the **scaleX** and **scaleY** arguments.
-
-Canvases can be added to a renderer using the **PixelRenderer.addCanvas(canvas)** method.
+A canvas represents a drawable window within the renderer. A forward pass is performed which maps each pixel drawn using the canvas' local pixel coordinates to the global coordinates of the screen. This is performed using an affine transformation matrices, and the canvas is able to be scaled/offset by changing the **x**, **y**, **scaleX** and **scaleY** arguments when adding a canvas to the renderer using the **PixelRenderer.addCanvas(x, y, canvas, scaleX=1, scaleY=1)** method.
 
 ### Constructor
-` Canvas(x, y, width, height, scaleX=1, scaleY=1) `
+` Canvas(width, height) `
 
 ## CanvasDrawer
+Referenced by Canvas instances through the **Canvas.drawer** property.
+Currently implements the following methods:
+
+` drawPixel(x, y, char) `
+` drawRect(x, y, rectWidth, rectHeight, char) `
+` drawCircle(cx, cy, radius, char) `
+` clearRect(x, y, width, height) `
+` drawSprite(x, y, sprite)`
+
+Performance is dependent on the number of pixels drawn.
+These methods are accessible in all Canvas instance, i.e. you can directly call **canvas.drawRect()** rather than calling **Canvas.drawer.drawRect()**
 
 ## Sprite
 
