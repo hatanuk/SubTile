@@ -36,8 +36,13 @@ class PixelRenderer {
 
   }
 
-  addCanvas(x, y, canvas) {
-    this.canvases.push({canvas, xOffset: x, yOffset: y})
+  addCanvas(x, y, canvas, scaleX=1, scaleY=1) {
+    canvas.xOffset = x
+    canvas.yOffset = y
+    canvas.scaleX = scaleX
+    canvas.scaleY = scaleY
+    canvas.updateTransformMatrix()
+    this.canvases.push(canvas)
   }
 
 
@@ -58,7 +63,7 @@ class PixelRenderer {
       canvas => {
         canvas.getMappedCoordinates().forEach(
         coord => {
-          this._renderPixel(coord.x + canvas.xOffset, coord.y + canvas.yOffset, coord.char)
+          this._renderPixel(coord.x, coord.y, coord.char)
         })
         }
       )
@@ -104,4 +109,5 @@ class PixelRenderer {
     return bitmapRows.join("\n")
 
     
+  }
 }

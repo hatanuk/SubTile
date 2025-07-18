@@ -1,22 +1,30 @@
 class Canvas {
 
-  constructor(width, height, scaleX=1, scaleY=1) {
+  constructor(width, height) {
 
     this.width = width
     this.height = height
-    
-    // affine transformation matrix
 
-    this.T = new Transform2D(
-        scaleX, 0,
-        0, scaleY,
-        0, 0
-    )
+    this.xOffset = 0
+    this.yOffset = 0
+    this.scaleY = 0
+    this.scaleX = 0
+    
+    this.updateTranformMatrix()
       
     // 2D canvas represented as a packed 1D buffer
     this.buffer = new PackedArray(this.width * this.height)
     this.drawer = new CanvasDrawer(this.buffer, this.width, this.height)
 
+  }
+
+  updateTranformMatrix() {
+     // affine transformation matrix
+    this.T = new Transform2D(
+        this.scaleX, 0,
+        0, this.scaleY,
+        this.xOffset, this.yOffset
+    )
   }
 
   getMappedCoordinates() {
