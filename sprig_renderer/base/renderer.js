@@ -5,9 +5,8 @@ class PixelRenderer {
   by dynamically updating the legend.
 
   Usage: 
-  setPixel(x, y, char) - draws a pixel at a given coordinate
   renderFrame(x, y, char) - refreshes the legend to apply changes
-
+  addCanvas(canvas) - Adds a canvas to render, with the last added canvas being drawn on top.
   */ 
 
   constructor(screenWidth, screenHeight) {
@@ -37,13 +36,10 @@ class PixelRenderer {
 
   }
 
-  addCanvas(canvas) {
-    this.canvases.push(canvas)
+  addCanvas(x, y, canvas) {
+    this.canvases.push({canvas, xOffset: x, yOffset: y})
   }
 
-  drawPixel(x, y, char) {
-    this.buffer.setChar(this._getBufferIndex(x, y), char)
-  }
 
   renderFrame() {
       // around 2.3 ms per call
@@ -62,7 +58,7 @@ class PixelRenderer {
       canvas => {
         canvas.getMappedCoordinates().forEach(
         coord => {
-          this.drawPixel(coord.x, coord.y, coord.char)
+          this._renderPixel(coord.x + canvas.xOffset, coord.y + canvas.yOffset, coord.char)
         })
         }
       )
@@ -83,6 +79,11 @@ class PixelRenderer {
 
   // PRIVATE METHODS
 
+  
+  _renderPixel(x, y, char) {
+    this.buffer.setChar(this._getBufferIndex(x, y), char)
+  }
+
   _tileToBitmapKey(tx, ty) {
     return String.fromCharCode(47 + ty * 10 + tx);
   }
@@ -101,12 +102,6 @@ class PixelRenderer {
     }
 
     return bitmapRows.join("\n")
+
+    
 }
-
-  _getBufferIndex(x, y) {
-    return x + y * this.screenTileWidth * this.tileSize
-  }
-}
-
-
-

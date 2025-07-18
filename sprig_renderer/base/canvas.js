@@ -1,6 +1,6 @@
 class Canvas {
 
-  constructor(x, y, width, height, scaleX=1, scaleY=1) {
+  constructor(width, height, scaleX=1, scaleY=1) {
 
     this.width = width
     this.height = height
@@ -10,7 +10,7 @@ class Canvas {
     this.T = new Transform2D(
         scaleX, 0,
         0, scaleY,
-        x, y
+        0, 0
     )
       
     // 2D canvas represented as a packed 1D buffer
