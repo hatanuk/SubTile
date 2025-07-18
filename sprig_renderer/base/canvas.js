@@ -16,6 +16,14 @@ class Canvas {
     this.buffer = new PackedArray(this.width * this.height)
     this.drawer = new CanvasDrawer(this.buffer, this.width, this.height)
 
+
+    // dynamically binds all publicc CanvasDrawer methods to Canvas
+    for (const key of Object.getOwnPropertyNames(CanvasDrawer.prototype)) {
+      if (key !== 'constructor' && key[0] !== "_" && typeof this.drawer[key] === 'function') {
+        this[key] = this.drawer[key].bind(this.drawer);
+      }
+    }
+
   }
 
   updateTranformMatrix() {
