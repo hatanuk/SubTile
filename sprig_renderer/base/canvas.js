@@ -151,6 +151,38 @@ class CanvasDrawer {
     this.buffer.resetValues()
   }
 
+  drawLine(x0, y0, x1, y1, char) {
+    x0 = x0 | 0
+    y0 = y0 | 0
+    x1 = x1 | 0
+    y1 = y1 | 0
+
+    let dx = Math.abs(x1 - x0)
+    let dy = Math.abs(y1 - y0)
+    let sx = x0 < x1 ? 1 : -1
+    let sy = y0 < y1 ? 1 : -1
+    let err = dx - dy
+
+    while (true) {
+      if (this._isInBounds(x0, y0)) {
+        this.buffer.setChar(this._getBufferIndex(x0, y0), char)
+      }
+
+      if (x0 === x1 && y0 === y1) break
+
+      let e2 = 2 * err
+      if (e2 > -dy) {
+        err -= dy
+        x0 += sx
+      }
+      if (e2 < dx) {
+        err += dx
+        y0 += sy
+      }
+    }
+  }
+
+
 
   drawSprite(x, y, sprite) {
 
