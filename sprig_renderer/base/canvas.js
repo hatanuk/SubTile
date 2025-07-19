@@ -10,7 +10,7 @@ class Canvas {
     this.scaleY = 0
     this.scaleX = 0
     
-    this.updateTranformMatrix()
+    this.updateTransformMatrix()
       
     // 2D canvas represented as a packed 1D buffer
     this.buffer = new PackedArray(this.width * this.height)
@@ -26,7 +26,7 @@ class Canvas {
 
   }
 
-  updateTranformMatrix() {
+  updateTransformMatrix() {
      // affine transformation matrix
     this.T = new Transform2D(
         this.scaleX, 0,
@@ -143,8 +143,12 @@ class CanvasDrawer {
   }
 
 
-  clearRect({x, y, width, height}) {
-    this.drawRect(x, y, width, height, "2")
+  clearRect(x, y, width, height) {
+    this.drawRect(x, y, width, height, ".")
+  }
+
+  clearCanvas() {
+    this.buffer.resetValues()
   }
 
 

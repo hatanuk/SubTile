@@ -8,7 +8,7 @@ class PixelRenderer {
 
   Usage: 
   renderFrame(x, y, char) - refreshes the legend to apply changes
-  addCanvas(canvas) - Adds a canvas to render, with the last added canvas being drawn on top.
+  addCanvas(x, y, canvas, scaleX=1, scaleY=1) - Adds a canvas to render, with the last added canvas being drawn on top.
   */ 
 
   constructor(screenWidth, screenHeight) {
@@ -38,7 +38,12 @@ class PixelRenderer {
 
   }
 
-  addCanvas(canvas) {
+  addCanvas(x, y, canvas, scaleX=1, scaleY=1) {
+    canvas.xOffset = x
+    canvas.yOffset = y
+    canvas.scaleX = scaleX
+    canvas.scaleY = scaleY
+    canvas.updateTransformMatrix()
     this.canvases.push(canvas)
   }
 
@@ -60,7 +65,7 @@ class PixelRenderer {
       canvas => {
         canvas.getMappedCoordinates().forEach(
         coord => {
-          this.drawPixel(coord.x, coord.y, coord.char)
+          this._renderPixel(coord.x, coord.y, coord.char)
         })
         }
       )
@@ -81,8 +86,12 @@ class PixelRenderer {
 
   // PRIVATE METHODS
 
+   _getBufferIndex(x, y) {
+    return x + y * (this.screenTileWidth * this.tileSize)
+  }
+
   
-  _drawPixel(x, y, char) {
+  _renderPixel(x, y, char) {
     this.buffer.setChar(this._getBufferIndex(x, y), char)
   }
 
@@ -106,32 +115,6 @@ class PixelRenderer {
     return bitmapRows.join("\n")
 
     
-}
-
-  // PRIVATE METHODS
-
-  _tileToBitmapKey(tx, ty) {
-    return String.fromCharCode(47 + ty * 10 + tx);
-  }
-
-  _tileToBitmap(tx, ty) {
-    let bitmapRows = new Array(this.tileSize)
-    const startX = tx * this.tileSize
-    const startY = ty * this.tileSize
-
-    for (let y = 0; y < this.tileSize; y++) {
-      let row = new Array(this.tileSize)
-      for (let x = 0; x < this.tileSize; x++) {
-        row[x] = (this.buffer.getChar(this._getBufferIndex(startX + x, startY + y)))
-      }
-      bitmapRows[y] = row.join("")
-    }
-
-    return bitmapRows.join("\n")
-}
-
-  _getBufferIndex(x, y) {
-    return x + y * this.screenTileWidth * this.tileSize
   }
 }
 
@@ -228,6 +211,9 @@ class Sprite {
         }
 }
 
+
+
+
 class PackedArray {
 
     constructor(size) {
@@ -236,6 +222,8 @@ class PackedArray {
         with two chars being stored as a single element in a Uint8Array
         (as a side effect, the array must contain an even number of chars or be padded)
         */ 
+
+        this.size = size
 
         this.charToNibble = {
             ".": 0x0,
@@ -260,8 +248,12 @@ class PackedArray {
         Object.entries(this.charToNibble).map(([k, v]) => [v, k])
         );
 
-        this.values = new Uint8Array(size / 2)
+        this.values = new Uint8Array(this.size / 2)
 
+    }
+
+    resetValues() {
+        this.values = new Uint8Array(this.size / 2)
     }
 
     getValue(index) {
@@ -310,6 +302,81 @@ class PackedArray {
     }
 
 }
+
+class Canvas {
+
+  constructor(width, height) {
+
+    this.width = width
+    this.height = height
+
+    this.xOffset = 0
+    this.yOffset = 0
+    this.scaleY = 0
+    this.scaleX = 0
+    
+    this.updateTransformMatrix()
+      
+    // 2D canvas represented as a packed 1D buffer
+    this.buffer = new PackedArray(this.width * this.height)
+    this.drawer = new CanvasDrawer(this.buffer, this.width, this.height)
+
+
+    // dynamically binds all publicc CanvasDrawer methods to Canvas
+    for (const key of Object.getOwnPropertyNames(CanvasDrawer.prototype)) {
+      if (key !== 'constructor' && key[0] !== "_" && typeof this.drawer[key] === 'function') {
+        this[key] = this.drawer[key].bind(this.drawer);
+      }
+    }
+
+  }
+
+  updateTransformMatrix() {
+     // affine transformation matrix
+    this.T = new Transform2D(
+        this.scaleX, 0,
+        0, this.scaleY,
+        this.xOffset, this.yOffset
+    )
+  }
+
+  getMappedCoordinates() {
+
+    // Maps all non-"." values to the screen space and returns their coordinates and value
+
+    const charFilter = (char) => char !== "."
+    let mappedCoordinates = []
+
+    for (let y = 0; y < this.height; y++) {
+      for (let x = 0; x < this.width; x++) {
+        let char = this.buffer.getChar(this._getBufferIndex(x, y))
+
+        if (!charFilter(char)) continue;
+
+        mappedCoordinates.push({
+          x: Math.floor(this._transformX(x, y)), 
+          y: Math.floor(this._transformY(x, y)), 
+          char})
+      }
+    }
+
+    return mappedCoordinates
+  }
+
+  _transformX(x, y) {
+    return this.T.T00 * x + this.T.T01 * y + this.T.b0
+  }
+
+  _transformY(x, y) {
+    return this.T.T10 * x + this.T.T11 * y + this.T.b1
+  }
+
+  _getBufferIndex(x, y) {
+    return x + y * this.width
+  }
+
+}
+
 
 class CanvasDrawer {
 
@@ -381,8 +448,12 @@ class CanvasDrawer {
   }
 
 
-  clearRect({x, y, width, height}) {
-    this.drawRect(x, y, width, height, "2")
+  clearRect(x, y, width, height) {
+    this.drawRect(x, y, width, height, ".")
+  }
+
+  clearCanvas() {
+    this.buffer.resetValues()
   }
 
 
@@ -408,64 +479,6 @@ class CanvasDrawer {
    _isInBounds(x, y) {
     return y < this.height && y >= 0
     && x < this.width && x >= 0
-  }
-
-  _getBufferIndex(x, y) {
-    return x + y * this.width
-  }
-
-}
-
-class Canvas {
-
-  constructor(x, y, width, height, scaleX=1, scaleY=1) {
-
-    this.width = width
-    this.height = height
-    
-    // affine transformation matrix
-
-    this.T = new Transform2D(
-        scaleX, 0,
-        0, scaleY,
-        x, y
-    )
-      
-    // 2D canvas represented as a packed 1D buffer
-    this.buffer = new PackedArray(this.width * this.height)
-    this.drawer = new CanvasDrawer(this.buffer, this.width, this.height)
-
-  }
-
-  getMappedCoordinates() {
-
-    // Maps all non-"." values to the screen space and returns their coordinates and value
-
-    const charFilter = (char) => char !== "."
-    let mappedCoordinates = []
-
-    for (let y = 0; y < this.height; y++) {
-      for (let x = 0; x < this.width; x++) {
-        let char = this.buffer.getChar(this._getBufferIndex(x, y))
-
-        if (!charFilter(char)) continue;
-
-        mappedCoordinates.push({
-          x: Math.floor(this._transformX(x, y)), 
-          y: Math.floor(this._transformY(x, y)), 
-          char})
-      }
-    }
-
-    return mappedCoordinates
-  }
-
-  _transformX(x, y) {
-    return this.T.T00 * x + this.T.T01 * y + this.T.b0
-  }
-
-  _transformY(x, y) {
-    return this.T.T10 * x + this.T.T11 * y + this.T.b1
   }
 
   _getBufferIndex(x, y) {

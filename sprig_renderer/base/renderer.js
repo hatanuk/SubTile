@@ -6,7 +6,7 @@ class PixelRenderer {
 
   Usage: 
   renderFrame(x, y, char) - refreshes the legend to apply changes
-  addCanvas(canvas) - Adds a canvas to render, with the last added canvas being drawn on top.
+  addCanvas(x, y, canvas, scaleX=1, scaleY=1) - Adds a canvas to render, with the last added canvas being drawn on top.
   */ 
 
   constructor(screenWidth, screenHeight) {
@@ -83,6 +83,10 @@ class PixelRenderer {
   }
 
   // PRIVATE METHODS
+
+   _getBufferIndex(x, y) {
+    return x + y * (this.screenTileWidth * this.tileSize)
+  }
 
   
   _renderPixel(x, y, char) {

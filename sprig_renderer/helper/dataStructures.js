@@ -10,6 +10,8 @@ class PackedArray {
         (as a side effect, the array must contain an even number of chars or be padded)
         */ 
 
+        this.size = size
+
         this.charToNibble = {
             ".": 0x0,
             "1": 0x1,
@@ -33,8 +35,12 @@ class PackedArray {
         Object.entries(this.charToNibble).map(([k, v]) => [v, k])
         );
 
-        this.values = new Uint8Array(size / 2)
+        this.values = new Uint8Array(this.size / 2)
 
+    }
+
+    resetValues() {
+        this.values = new Uint8Array(this.size / 2)
     }
 
     getValue(index) {
