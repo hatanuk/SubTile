@@ -12,7 +12,7 @@ Currently, the renderer supports the creation of multiple canvases which can be 
 
 ### Creating a renderer, canvas, and drawing a rectangle
 ```js
-let renderer = new PixelRenderer(160, 128);
+let renderer = new SubTileRenderer(160, 128);
 let canvas = new Canvas(0, 0, 160, 128);
 renderer.addCanvas(0, 0, canvas);
 canvas.drawRect(0, 0, 10, 10, "2");
@@ -23,7 +23,7 @@ renderer.renderFrame();
 ```js
 let spriteOneRGB = [164, 255, 0, 164, 255, 0 /* ... */];
 
-let renderer = new PixelRenderer(160, 128);
+let renderer = new SubTileRenderer(160, 128);
 let canvas = new Canvas(0, 0, 160, 128);
 renderer.addCanvas(0, 0, canvas);
 
@@ -35,12 +35,12 @@ renderer.renderFrame();
 
 ---
 
-## `PixelRenderer`
+## `SubTileRenderer`
 The main object that controls frame-by-frame rendering to the screen.
 
 ### Constructor
 ```js
-new PixelRenderer(screenWidth, screenHeight)
+new SubTileRenderer(screenWidth, screenHeight)
 ```
 > Sprig’s native screen resolution is 160×128, which is the recommended `screenWidth` and `screenHeight`.
 
@@ -52,7 +52,7 @@ A canvas represents a drawable window within the renderer. A forward pass maps e
 You can scale or offset the canvas using the `x`, `y`, `scaleX`, and `scaleY` arguments when adding a canvas to the renderer using:
 
 ```js
-PixelRenderer.addCanvas(x, y, canvas, scaleX = 1, scaleY = 1)
+SubTileRenderer.addCanvas(x, y, canvas, scaleX = 1, scaleY = 1)
 ```
 
 ### Constructor
