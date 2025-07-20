@@ -5,6 +5,9 @@ class Canvas {
     this.width = width
     this.height = height
 
+    // flag gets set to true during any draw operation
+    this.needsRender = false
+
     this.xOffset = 0
     this.yOffset = 0
     this.scaleY = 0
@@ -17,10 +20,14 @@ class Canvas {
     this.drawer = new CanvasDrawer(this.buffer, this.width, this.height)
 
 
-    // dynamically binds all publicc CanvasDrawer methods to Canvas
+    // dynamically binds all public CanvasDrawer methods to Canvas
     for (const key of Object.getOwnPropertyNames(CanvasDrawer.prototype)) {
       if (key !== 'constructor' && key[0] !== "_" && typeof this.drawer[key] === 'function') {
-        this[key] = this.drawer[key].bind(this.drawer);
+        const drawFn = this.drawer[key].bind(this.drawer)
+        this[key] = (...args) => {
+          this.needsRender = true
+          return drawFn(...args)
+        }
       }
     }
 

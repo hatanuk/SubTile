@@ -1,4 +1,5 @@
-class PixelRenderer {
+
+class SubTileRenderer {
 
   /*
   Allows tile-based renderers (such as Sprig) to display pixels at arbitrary coordinates 
@@ -61,14 +62,15 @@ class PixelRenderer {
     // draws mapped pixels from each canvas onto screen buffer (forward pass)
     this.canvases.forEach(
       canvas => {
+        if (!canvas.needsRender) return
         canvas.getMappedCoordinates().forEach(
         coord => {
           this._renderPixel(coord.x, coord.y, coord.char)
         })
+        canvas.needsRender = false
         }
       )
     
-
     // convert each tile (from buffer) to a bitmap and add it to the legend
     for (let ty = 0; ty < this.screenTileHeight; ty++) {
       for (let tx = 0; tx < this.screenTileWidth; tx++) {
