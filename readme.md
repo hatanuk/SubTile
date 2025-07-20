@@ -3,21 +3,21 @@ An arbitrary pixel renderer engine for game creation platform [Sprig](https://sp
 
 Currently, the renderer supports the creation of multiple canvases which can be transformed, as well as the drawing of basic shapes and sprites represented as RGB arrays [see below].
 
-    Note: This was created as a project for [Shipwrecked](https://shipwrecked.hackclub.com/bay) to gain familiarity with Javascript and graphical programming. I you'll find it helpful; but expect inefficiencies and quirks. *
+`Note: This was created as a project for [Shipwrecked](https://shipwrecked.hackclub.com/bay) to gain familiarity with Javascript and graphical programming. I you'll find it helpful; but expect inefficiencies and quirks. `
 
 
 ## Example Usage
 
 **Creating a renderer, canvas and drawing a rectangle.**
-` let renderer = new PixelRenderer(160, 128)
+``` let renderer = new PixelRenderer(160, 128)
 let canvas = new Canvas(0, 0, 160, 128)
 renderer.addCanvas(0, 0, canvas) 
 canvas.drawRect(0, 0, 10, 10, "2")
-renderer.renderFrame() `
+renderer.renderFrame() 
+```
 
 **Creating a renderer, canvas and drawing a sprite.**
-` 
-spriteOneRGB = [164, 255, 0, 164, 255, 0 ...]
+``` spriteOneRGB = [164, 255, 0, 164, 255, 0 ...] 
 
 let renderer = new PixelRenderer(160, 128)
 let canvas = new Canvas(0, 0, 160, 128)
@@ -26,7 +26,7 @@ renderer.addCanvas(0, 0, canvas)
 let spriteOne = new Sprite(spriteOneRGB, 64, 64)
 canvas.drawer.drawSprite(0, 0, spriteOne)
 
-renderer.renderFrame() `
+renderer.renderFrame() ```
 
 ## PixelRenderer
 Main object which controls frame-by-frame rendering processes to the screen.
