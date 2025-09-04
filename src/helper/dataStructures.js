@@ -43,40 +43,22 @@ class PackedArray {
         this.values = new Uint8Array(this.size / 2)
     }
 
+    getByteIndex(index) {
+        return index >> 1;
+    }
+
     getValue(index) {
-        const byteIndex = Math.floor(index / 2)
-        const isHighNibble = index % 2 == 0
-
-
-        if (isHighNibble) {
-            // shift to right, mask
-            return (this.values[byteIndex] >> 4) & 0xF
-        } else {
-            // just mask
-            return (this.values[byteIndex] & 0xF)
-        }
+        const byteIndex = this.getByteIndex(index)
+        const shift = (index & 1) ? 0 : 4 // shift is required for high nibbles
+        return this.values[byteIndex] >> shift & 0xF // extracts lowest 4 bits
     }
 
     setValue(index, val) {
 
-        if (val > 0xF) return;
-
-        const byteIndex = Math.floor(index / 2)
-        const isHighNibble = index % 2 == 0
-
-        if (isHighNibble) {
-            // clears the high nibble
-            this.values[byteIndex] = this.values[byteIndex] & 0xF
-            // sets high nibble to a shifted value using logical OR
-            this.values[byteIndex] = this.values[byteIndex] | (val << 4)
-
-        } else {
-             // clears the low nibble
-            this.values[byteIndex] = this.values[byteIndex] & 0xF0
-            // sets low nibble to the value using logical OR
-            this.values[byteIndex] = this.values[byteIndex] | val
-        }
-
+        const byteIndex = this.getByteIndex(index)
+        const shift = (index & 1) ? 0 : 4
+        const mask = (index & 1) ? 0xF0 : 0x0F
+        this.values[byteIndex]= (this.values[byteIndex] & mask) | ((val & 0xF) << shift) // clears target nibble, sets target nibble to value using OR
     
     }
 
@@ -96,6 +78,28 @@ class Transform2D {
   constructor(T00, T01, T10, T11, b0, b1) {
     this.T00 = T00; this.T01 = T01; this.b0 = b0
     this.T10 = T10, this.T11 = T11; this.b1 = b1
+  }
+
+  multiply(other) {
+
+    const T00 = this.T00 * other.T00 + this.T01 * other.T10;
+    const T01 = this.T00 * other.T01 + this.T01 * other.T11;
+    const b0  = this.T00 * other.b0  + this.T01 * other.b1 + this.b0;
+
+    const T10 = this.T10 * other.T00 + this.T11 * other.T10;
+    const T11 = this.T10 * other.T01 + this.T11 * other.T11;
+    const b1  = this.T10 * other.b0  + this.T11 * other.b1 + this.b1;
+
+    return new Transform2D(T00, T01, T10, T11, b0, b1)
+
+  }
+
+  transformX(x, y) {
+    return this.T00 * x + this.T01 * y + this.b0
+  }
+
+  transformY(x, y) {
+    return this.T10 * x + this.T11 * y + this.b1
   }
 
 }
