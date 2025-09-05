@@ -25,7 +25,7 @@ class Surface {
     this.T = this.T.multiply(T)
   }
 
-  removeTransformation() {
+  resetTransformations() {
     this.T = new Transform2D(
         1, 0,
         0, 1,
@@ -33,11 +33,41 @@ class Surface {
     )
   }
 
+  // TRANSFORMATION INTERFACES 
+
+  rotate(radians) {
+    const cosRad = Math.cos(radians)
+    const sinRad = Math.sin(radians)
+    this.applyTransformation(new Transform2D(
+      cosRad, -sinRad,
+      sinRad, cosRad,
+      0, 0
+    ))
+  }
+
+  shear(shearX=0, shearY=0) {
+    this.applyTransformation(new Transform2D(
+      1, shearX,
+      shearY, 1,
+      0, 0
+    ))
+  }
+
+  scale(scaleX=1, scaleY=1) {
+    this.applyTransformation(new Transform2D(
+      Math.abs(scaleX), 0,
+      0, Math.abs(scaleY),
+      0, 0
+    ))
+  }
+
+
+
   isTransformed() {
     // returns whether the surface has been scaled or skewed, requiring each pixel to undergo a transformation calculation
     // offset transformations can be blitted efficiently and are not counted
 
-    return this.T.T00 !== 1 || this.T.T11 !== 1 || this.T.T01 !== 0 || this.T.T01 !== 0
+    return this.T.T00 !== 1 || this.T.T11 !== 1 || this.T.T01 !== 0 || this.T.T10 !== 0
 
   }
 
@@ -46,6 +76,7 @@ class Surface {
     // maps all non-"." values to the screen space and returns their coordinates and value
 
     const charFilter = (char) => char !== "."
+    const out = []
     let transformedCoordinates = []
 
     for (let y = 0; y < this.height; y++) {

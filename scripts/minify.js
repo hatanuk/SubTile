@@ -25,6 +25,7 @@ function extractRawCode(dir) {
             const code = fs.readFileSync(fullPath, "utf8")
             results[fullPath] = code 
         }
+
     })
 
     return results

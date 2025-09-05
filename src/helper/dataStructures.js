@@ -102,4 +102,29 @@ class Transform2D {
     return this.T10 * x + this.T11 * y + this.b1
   }
 
+  determinant() {
+    return this.T00 * this.T11 - this.T01 * this.T10
+  }
+
+  isInvertible(eps = 1e-8) {
+    const det = this.determinant()
+    return isFinite(det) && Math.abs(det) > eps
+  }
+
+  inverse() {
+    const det = this.determinant()
+    if (!isFinite(det) || Math.abs(det) < 1e-8) return null
+
+    const iT00 =  this.T11 / det
+    const iT01 = -this.T01 / det
+    const iT10 = -this.T10 / det
+    const iT11 =  this.T00 / det
+
+    // inverse translation = -A^{-1} * b
+    const ib0 = -(iT00 * this.b0 + iT01 * this.b1)
+    const ib1 = -(iT10 * this.b0 + iT11 * this.b1)
+
+    return new Transform2D(iT00, iT01, iT10, iT11, ib0, ib1)
+  }
+
 }

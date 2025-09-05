@@ -1,14 +1,5 @@
 class SubTileRenderer {
 
-  /*
-  Allows tile-based renderers (such as Sprig) to display pixels at arbitrary coordinates 
-  by dynamically updating the legend.
-
-  Usage: 
-  renderFrame(x, y, char) - refreshes the legend to apply changes
-  addsurface(x, y, surface, scaleX=1, scaleY=1) - Adds a surface to render, with the last added surface being drawn on top.
-  */ 
-
   constructor(screenTileWidth = 10, screenTileHeight = 8) {
 
     ///
@@ -51,6 +42,7 @@ class SubTileRenderer {
       surface => {
 
         if (surface.isTransformed()) {
+
           // perform affine transformation mapping for each pixel
           // much less efficient then blitting, it is recommended only offset transformations are used
           surface.getTransformedPixels().forEach(
@@ -61,12 +53,13 @@ class SubTileRenderer {
           // if no transformation needed, blit directly
           blit(surface.buffer, this.buffer, 
             surface.width, surface.height, 
-            this.pixelWidth, this.pixelHeight, 
             surface.T.b0, surface.T.b1)
+
         }
           // mark tiles touched by surface as dirty
         for (let x = surface.T.b0; x < surface.T.b0 + surface.width; x += this.TILESIZE ) {
           for (let y = surface.T.b1; y < surface.T.b1 + surface.height; y += this.TILESIZE) {
+            if (x < 0 || x >= this.pixelWidth || y < 0 || y >= this.pixelHeight) {continue}
             this.markDirty(this._coordToTile(x, y))
           }
         }
@@ -88,7 +81,10 @@ class SubTileRenderer {
 
   // DIRTY TILE MANAGEMENT
 
-  markDirty({tx, ty}) { this.dirtyBucket.add(this._getLegendIndex(tx, ty))}
+  markDirty({tx, ty}) { 
+    if (tx < 0 || ty < 0 || tx >= this.screenTileWidth || ty >= this.screenTileHeight) return
+    this.dirtyBucket.add(this._getLegendIndex(tx, ty))
+  }
 
   clearDirtyBucket() { this.dirtyBucket.clear()}
 
@@ -126,8 +122,8 @@ class SubTileRenderer {
   )
   }
 
-  removeTransformation(surface) {
-    surface.removeTransformation()
+  removeTransformations(surface) {
+    surface.resetTransformations()
   }
 
 
@@ -152,7 +148,7 @@ class SubTileRenderer {
   }
 
   _tileToBitmapKey(tx, ty) {
-    return String.fromCharCode(47 + ty * 10 + tx)
+    return String.fromCharCode(47 + ty * this.screenTileWidth + tx)
   }
 
   _legendIndexToTile(index) {
