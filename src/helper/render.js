@@ -82,4 +82,14 @@ function blit(sourceBuffer, destBuffer, copyWidth, copyHeight, x=0, y=0) {
     // epilogue: fix last byte
     const destLastIndex = curDestX + --remainingWidth
     const srcLastIndex = curSrcX + remainingWidth
-    // write to the low 
+    // write to the low nibble
+    destBuffer.pixels.setValue(destLastIndex, sourceBuffer.pixels.getValue(srcLastIndex))
+  }
+
+  }
+}
+
+
+function getBufferIndex(x, y, width) {
+  return x + y * width
+}
