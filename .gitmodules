@@ -1,0 +1,3 @@
+[submodule "wolfenstein_js"]
+	path = wolfenstein_js
+	url = https://github.com/vpoupet/wolfenstein.git
