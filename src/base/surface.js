@@ -55,11 +55,20 @@ class Surface {
 
   scale(scaleX=1, scaleY=1) {
     this.applyTransformation(new Transform2D(
-      Math.abs(scaleX), 0,
-      0, Math.abs(scaleY),
+      scaleX, 0,
+      0, scaleY,
       0, 0
     ))
   }
+
+  offset(offsetX=0, offsetY=0) {
+    this.applyTransformation(new Transform2D(
+      1, 0,
+      0, 1,
+      offsetX, offsetY
+    ))
+  }
+
 
 
 
@@ -71,7 +80,7 @@ class Surface {
 
   }
 
-  getTransformedPixels() {
+  getTransformedPixels(clearing=false) {
 
     // maps all non-"." values to the screen space and returns their coordinates and value
 
@@ -83,7 +92,7 @@ class Surface {
       for (let x = 0; x < this.width; x++) {
         let char = this.buffer.getChar(x, y)
 
-        if (!charFilter(char)) continue;
+        if (!clearing && !charFilter(char)) continue;
 
         transformedCoordinates.push({
           x: Math.floor(this.T.transformX(x, y)), 
@@ -215,7 +224,7 @@ class Drawer {
     this.drawRect(x, y, width, height, ".")
   }
 
-  clearCanvas() {
+  clearSurface() {
     this.buffer.clear()
   }
 

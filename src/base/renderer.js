@@ -1,3 +1,6 @@
+// potential improvements:
+// inverse mapping
+
 class SubTileRenderer {
 
   constructor(screenTileWidth = 10, screenTileHeight = 8) {
@@ -37,35 +40,8 @@ class SubTileRenderer {
 
   endFrame() {
 
-    // draws mapped pixels from each surface onto screen buffer (forward pass)
     this.surfaces.forEach(
-      surface => {
-
-        if (surface.isTransformed()) {
-
-          // perform affine transformation mapping for each pixel
-          // much less efficient then blitting, it is recommended only offset transformations are used
-          surface.getTransformedPixels().forEach(
-          coord => {
-            this._renderPixel(coord.x, coord.y, coord.char)
-          })
-        } else {
-          // if no transformation needed, blit directly
-          blit(surface.buffer, this.buffer, 
-            surface.width, surface.height, 
-            surface.T.b0, surface.T.b1)
-
-        }
-          // mark tiles touched by surface as dirty
-        for (let x = surface.T.b0; x < surface.T.b0 + surface.width; x += this.TILESIZE ) {
-          for (let y = surface.T.b1; y < surface.T.b1 + surface.height; y += this.TILESIZE) {
-            if (x < 0 || x >= this.pixelWidth || y < 0 || y >= this.pixelHeight) {continue}
-            this.markDirty(this._coordToTile(x, y))
-          }
-        }
-        
-      }
-
+        surface => this._drawSurface(surface)
       )
     
     // convert each tile (from buffer) to a bitmap and add it to the legend
@@ -79,11 +55,29 @@ class SubTileRenderer {
     
   }
 
+  clearSurface(surface) {
+    surface.buffer.clear()
+    this._drawSurface(surface, true)
+  }
+
+  clearAll() {
+    this.buffer.clear()
+    this.markAllDirty()
+  }
+
   // DIRTY TILE MANAGEMENT
 
   markDirty({tx, ty}) { 
     if (tx < 0 || ty < 0 || tx >= this.screenTileWidth || ty >= this.screenTileHeight) return
     this.dirtyBucket.add(this._getLegendIndex(tx, ty))
+  }
+
+  markAllDirty() {
+    for (let ty = 0; ty < this.screenTileHeight; ty++) {
+      for (let tx = 0; tx < this.screenTileWidth; tx++) {
+        this.markDirty({tx, ty})
+      }
+    }
   }
 
   clearDirtyBucket() { this.dirtyBucket.clear()}
@@ -128,6 +122,33 @@ class SubTileRenderer {
 
 
   // PRIVATE METHODS
+
+  _drawSurface(surface, clearing=false) {
+
+        if (surface.isTransformed()) {
+
+          // perform affine transformation mapping for each pixel
+          // much less efficient then blitting, it is recommended only offset transformations are used
+          surface.getTransformedPixels(clearing).forEach(
+          coord => {
+            this._renderPixel(coord.x, coord.y, coord.char)
+          })
+        } else {
+          // if no transformation needed, blit directly
+          blit(surface.buffer, this.buffer, 
+            surface.width, surface.height, 
+            surface.T.b0, surface.T.b1)
+
+        
+          // mark tiles touched by surface as dirty
+        for (let x = surface.T.b0; x < surface.T.b0 + surface.width; x += this.TILESIZE ) {
+          for (let y = surface.T.b1; y < surface.T.b1 + surface.height; y += this.TILESIZE) {
+            if (x < 0 || x >= this.pixelWidth || y < 0 || y >= this.pixelHeight) {continue}
+            this.markDirty(this._coordToTile(x, y))
+          }
+        }
+        }
+  }
 
   _getBufferIndex(x, y) {
     return x + y * (this.screenTileWidth * this.TILESIZE)
