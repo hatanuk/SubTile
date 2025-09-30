@@ -20,7 +20,7 @@ class Sprite {
         for (let i = 0; i < bin.length; i++) rgbaBytes[i] = this._normaliseChannel(bin.charCodeAt(i))
         
         let paletteBytes = new Uint8Array(Math.floor(bin.length / 4))
-        buf.reduce((paletteIndex, cur, i, src) => {
+        rgbaBytes.reduce((paletteIndex, cur, i, src) => {
             if (i % 4 === 0 && i + 3 < src.length) {
                 const chunk = src.slice(i, i + 4)
                 const val = this._rgbaToPalette(chunk)

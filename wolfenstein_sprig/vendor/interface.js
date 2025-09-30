@@ -1,8 +1,3 @@
-// SubTile globals
-let renderer
-let gameSurface
-let hudSurface
-
 
 // adapter over pixels providing a DataView-like API
 class PixelView {
@@ -14,36 +9,22 @@ class PixelView {
   setUint32(byteOffset, rgba) {
     const i = byteOffset >> 2
     const x = i % this.width, y = (i / this.width) | 0
-    this.buffer.setChar(x, y, Sprite.rgbaToChar(rgba))
+    // Convert 32-bit RGBA integer to array format for SubTile
+    const r = (rgba >> 0) & 0xFF
+    const g = (rgba >> 8) & 0xFF  
+    const b = (rgba >> 16) & 0xFF
+    const a = (rgba >> 24) & 0xFF
+    this.buffer.setChar(x, y, Sprite.rgbaToChar([r, g, b, a]))
+    
+    // Mark the corresponding tile as dirty in the renderer
+    if (renderer) {
+      const tx = Math.floor(x / renderer.TILESIZE)
+      const ty = Math.floor(y / renderer.TILESIZE)
+      renderer.markDirty({tx, ty})
+    }
   }
 }
 
-
-/**
- * Dictionary of currently pressed keys (if the key exists and the value is true, then the key is currently pressed)
- * @type {{String: boolean}}
- */
-let pressedKeys = {};
-/**
- * Dictionary of key mappings for movement
- * Possible values :
- *  - 'move forward'
- *  - 'move backward'
- *  - 'turn left'
- *  - 'turn right'
- *  - 'strafe left'
- *  - 'strafe right'
- */
-let keymap = {
-    ArrowUp: 'moveForward',
-    ArrowDown: 'moveBackward',
-    ArrowLeft: 'turnLeft',
-    ArrowRight: 'turnRight',
-    z: 'moveForward',
-    s: 'moveBackward',
-    q: 'strafeLeft',
-    d: 'strafeRight',
-};
 let mouseSensitivity = .3;
 /**
  * HTML Canvas in which the game view is drawn
@@ -85,44 +66,19 @@ const netId = randomString(10);
  * (should be called whenever one of the score values changes)
  */
 function updateScore() {
-    let kills = document.getElementById("kills");
-    kills.innerText = "Kills: " + score.kills + " / " + score.totalKills;
-    let secrets = document.getElementById("secrets");
-    secrets.innerText = "Secrets: " + score.secrets + " / " + score.totalSecrets;
-    let treasures = document.getElementById("treasures");
-    treasures.innerText = "Treasures: " + score.treasures + " / " + score.totalTreasures;
-    document.getElementById("gold_key").style['display'] = player.goldKey ? 'block' : 'none';
-    document.getElementById("silver_key").style['display'] = player.silverKey ? 'block' : 'none';
+    // Score display removed for Sprig compatibility
+    // Could be implemented with addText() if needed
 }
 
 
-/**
- * Toggle between 320 x 200 (zoom x2) and 640 x 400 (zoom x1) resolutions
- */
-function toggleResolution() {
-    let option = document.getElementById("option_resolution");
-    if (zoom === 1) {
-        setZoom(2);
-        option.getElementsByTagName("span")[0].innerText = "High Resolution (320 x 200) [R]";
-        option.getElementsByTagName("img")[0].src = "images/button_off.png";
-    } else {
-        setZoom(1);
-        option.getElementsByTagName("span")[0].innerText = "High Resolution (640 x 400) [R]";
-        option.getElementsByTagName("img")[0].src = "images/button_on.png";
-    }
-}
 
 
 /**
  * Toggle between 60 fps and 30 fps
  */
 function toggleFPS() {
-    let option = document.getElementById("option_framerate");
     fps60 = !fps60;
-    let framerate = fps60 ? "(60 fps)" : "(30 fps)";
-    let button = fps60 ? "_on.png" : "_off.png";
-    option.getElementsByTagName("span")[0].innerText = "Framerate " + framerate;
-    option.getElementsByTagName("img")[0].src = "images/button" + button;
+    // DOM manipulation removed for Sprig compatibility
 }
 
 
@@ -131,9 +87,6 @@ function toggleFPS() {
  */
 function togglePushwalls() {
     showPushwalls = !showPushwalls;
-    let option = document.getElementById("option_pushwalls");
-    let button = showPushwalls ? "_on.png" : "_off.png";
-    option.getElementsByTagName("img")[0].src = "images/button" + button;
 }
 
 
@@ -141,15 +94,8 @@ function togglePushwalls() {
  * Toggle the visibility of the map
  */
 function toggleMap() {
-    let hud = document.getElementById("hud_canvas");
-    let option = document.getElementById("option_map");
-    if (hud.offsetParent === null) {
-        hud.style['display'] = 'block';
-        option.getElementsByTagName("img")[0].src = "images/button_on.png";
-    } else {
-        hud.style['display'] = 'none';
-        option.getElementsByTagName("img")[0].src = "images/button_off.png";
-    }
+    showMap = !showMap;
+    // DOM manipulation removed for Sprig compatibility
 }
 
 
@@ -159,7 +105,7 @@ function toggleMap() {
  */
 function startGame(level) {
 
-    let renderer = new SubTileRenderer(40, 25) // 320x400 resolution
+    renderer = new SubTileRenderer(40, 25) // 320x400 resolution
 
     gameSurface = new Surface(renderer.pixelWidth, renderer.pixelHeight)
     renderer.addSurface(gameSurface, 0, 0)
@@ -189,40 +135,45 @@ function startGame(level) {
     // canvasHUD.height = 256;
     // contextHUD = canvasHUD.getContext("2d");
     // gameScreen.appendChild(canvasHUD);
+    
+    // Create mock contextHUD for Sprig compatibility (no HTML canvas)
+    contextHUD = {
+        clearRect: () => {},
+        fillStyle: '',
+        fillRect: () => {}
+    };
+    loadResources().then(() => {
+        console.log("resources loaded")
+        loadLevel(level);
+    });
 
-    loadLevel(level);
-
-    // setup page events (graphics options and keyboard inputs)
-    document.getElementById("option_resolution").addEventListener("click", toggleResolution);
-    document.getElementById("option_framerate").addEventListener("click", toggleFPS);
-    document.getElementById("option_pushwalls").addEventListener("click", togglePushwalls);
-    document.getElementById("option_map").addEventListener("click", toggleMap);
-    document.getElementById("option_skip_level").addEventListener("click", loadNextLevel);
-    document.onkeydown = function (e) {
-        if (e.key === "Control") {
-            player.shoot();
-        } else if (e.key === "r") {
-            toggleResolution();
-        } else if (e.key === "m") {
-            toggleMap();
-        } else if (e.key === "l") {
-            loadNextLevel();
-        } else if (e.key in keymap) {
-            e.preventDefault();
-            pressedKeys[e.key] = true;
-        }
-    };
-    document.onkeyup = function (e) {
-        if (e.key in keymap) {
-            e.preventDefault();
-            pressedKeys[e.key] = false;
-        }
-    };
-    document.onkeypress = function (e) {
-        if (e.key === " ") {
-            player.activate();
-        }
-    };
+    // Sprig input handlers
+    onInput("w", () => {
+        player.move(player.speed);
+    });
+    onInput("s", () => {
+        player.move(-player.speed);
+    });
+    onInput("a", () => {
+        player.turn(-player.speed_a);
+    });
+    onInput("d", () => {
+        player.turn(player.speed_a);
+    });
+    
+    onInput("j", () => {
+        player.move(0, -player.speed);
+    });
+    onInput("l", () => {
+        player.move(0, player.speed);
+    });
+    onInput("k", () => {
+        player.shoot();
+    });
+    onInput("i", () => {
+        player.activate();
+    });
+ 
 }
 
 
@@ -230,59 +181,88 @@ function startGame(level) {
  * Function called when user clicks on the game screen canvas
  * (locks mouse pointer if it is not locked, shoots if already locked)
  */
-function handleClick() {
-    if (document.pointerLockElement === canvas) {
-        player.shoot();
-    } else {
-        canvas.requestPointerLock();
-    }
-}
-
-
-/**
- * Function called when the mouse lock status changes (mouse pointer captured by game canvas)
- */
-function handleLockChange() {
-    if (document.pointerLockElement === canvas) {
-        document.addEventListener('mousemove', handleMouseMove, false);
-    } else {
-        document.removeEventListener('mousemove', handleMouseMove);
-    }
-}
+// Mouse handling functions removed for Sprig compatibility
 
 
 /**
  * React to a movement of the mouse when locked in the game screen canvas
  */
-function handleMouseMove(e) {
-    player.turnAngle += e.movementX * mouseSensitivity;
+// Mouse movement handling removed for Sprig compatibility
+
+
+// Initialize game data for Sprig compatibility
+function initializeGameData() {
+    // Initialize basic game variables
+    player = new Player();
+    currentLevel = 0;
+    score = {
+        kills: 0,
+        totalKills: 0,
+        secrets: 0,
+        totalSecrets: 0,
+        treasures: 0,
+        totalTreasures: 0
+    };
+    
+    // Initialize game state
+    fps60 = false;
+    showMap = false;
+    showPushwalls = false;
+    isDrawing = false;
+    shouldDrawMap = true;
+    
+    // Initialize embedded game data (simplified for Sprig)
+    // In a full implementation, this would contain the actual Wolfenstein level data
+    initializeEmbeddedData();
 }
 
+// Initialize embedded game data
+function initializeEmbeddedData() {
+    // Create minimal game data for Sprig compatibility
+    // This is a simplified version - full implementation would embed actual Wolfenstein data
+    
+    // Initialize basic map data
+    plane0 = new Array(64).fill().map(() => new Array(64).fill(0));
+    plane1 = new Array(64).fill().map(() => new Array(64).fill(0));
+    plane2 = new Array(64).fill().map(() => new Array(64).fill(false));
+    
+    // Create a simple test level
+    for (let x = 0; x < 64; x++) {
+        for (let y = 0; y < 64; y++) {
+            if (x === 0 || x === 63 || y === 0 || y === 63) {
+                plane0[x][y] = 1; // Wall
+                plane2[x][y] = true; // Blocking
+            }
+        }
+    }
+    
+    // Set player starting position
+    player.x = 32;
+    player.y = 32;
+    player.dx = 1;
+    player.dy = 0;
+}
 
-window.onload = function () {
-    // load game data files, and display the episode selection screen
-    loadResources().then(() => {
-        document.getElementById("splash_screen").style['display'] = 'none';
-        document.getElementById("episode_select").style['display'] = 'block';
+// Initialize game directly for Sprig compatibility
+function initializeGame() {
+    // Initialize game data (embedded instead of loaded)
+    initializeGameData();
+    
+    // Start the first level directly
+    startGame(0);
+}
+
+// Start the game loop using Sprig's afterInput system
+function startGameLoop() {
+    afterInput(() => {
+        if (isDrawing) {
+            update();
+        }
     });
+}
 
-    let get_parameters = {};
-    if (window.location.search !== "") {
-        const parameters = window.location.search.substr(1).split('&');
-        for (const p of parameters) {
-            let [k, v] = p.split('=');
-            get_parameters[k] = v;
-        }
-    }
-
-    if (get_parameters['gid']) {
-        socket = new WebSocket("ws://127.0.0.1:8000/cs/" + get_parameters['gid']);
-        socket.onmessage = function (e) {
-            const data = JSON.parse(e.data);
-            updateGameState(data);
-        }
-    }
-};
+// Initialize the game when script loads
+initializeGame();
 
 function connect(gid) {
     socket = new WebSocket(`ws://games.zanapher.fr/cs/wolf_${gid}/`);

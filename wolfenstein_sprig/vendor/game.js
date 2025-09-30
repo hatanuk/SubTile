@@ -1,45 +1,3 @@
-/**
- * Representation of the player character
- * @type {Player}
- */
-let player;
-/**
- * Index of current level
- * @type {number}
- */
-let currentLevel;
-/**
- * Dictionary containing scoring elements:
- * - kills (count and total)
- * - treasures (count and total)
- * - secrets (count and total)
- */
-let score;
-/**
- * Things in the level (sprites, enemies, powerups, etc.)
- * @type {Array}
- */
-let things;
-/**
- * Array of door timers for doors being active (opening, open or closing)
- * The elements in the array are objects with attributes
- * - x: x-coordinate of the door
- * - y: y-coordinate of the door
- * - opening: boolean indicating if the door is opening (true) or closing (false)
- * - t: counter since door was open
- */
-let doorTimers;
-/**
- * Array of wall timers for secret passages being active (moving)
- * The elements in the array are objects with attributes
- * - x: the x-coordinate of the wall
- * - y: the y-coordinate of the wall
- * - t: time counter since the wall started moving
- * - dx, dy: indicate the direction in which the wall is moving (unit vector)
- */
-let wallTimers;
-
-let opponentPlayers = {};
 
 /**
  * Class representation of the game player character
@@ -316,53 +274,10 @@ function Player() {
     };
 
     this.update = function () {
-        let changed = false;
-        let movement = new Set();
-        for (let key in keymap) {
-            if (pressedKeys[key]) {
-                movement.add(keymap[key]);
-            }
-        }
-        // update player direction
-        if (movement.has('turnRight')) {
-            this.turnAngle += 1;
-        }
-        if (movement.has('turnLeft')) {
-            this.turnAngle -= 1;
-        }
-        if (this.turnAngle !== 0) {
-            player.turn(this.turnAngle * this.speed_a);
-            this.turnAngle = 0;
-            changed = true;
-        }
-        // update player position
-        let forward = 0;
-        let sideways = 0;
-        if (movement.has('moveForward')) {
-            forward += this.speed;
-        }
-        if (movement.has('moveBackward')) {
-            forward -= this.speed;
-        }
-        if (movement.has('strafeLeft')) {
-            sideways -= this.speed;
-        }
-        if (movement.has('strafeRight')) {
-            sideways += this.speed;
-        }
-        if (forward !== 0) {
-            if (sideways !== 0) {
-                player.move(forward / Math.sqrt(2), sideways / Math.sqrt(2));
-            } else {
-                player.move(forward);
-            }
-            changed = true;
-        } else if (sideways !== 0) {
-            player.move(0, sideways);
-            changed = true;
-        }
-
-        if (socket && socket.readyState === 1 && changed) {
+        // Input handling is now done directly in Sprig onInput() handlers
+        // This function can be used for other player updates if needed
+        
+        if (socket && socket.readyState === 1) {
             socket.send(JSON.stringify({
                 'id': netId,
                 'x': player.x,
@@ -793,10 +708,9 @@ function setupLevel() {
         }
     }
 
-    // if the draw loop hasn't started yet, start it
     if (!isDrawing) {
         isDrawing = true;
-        window.requestAnimationFrame(update);
+        startGameLoop();
     }
 
     shouldDrawMap = true;
@@ -885,8 +799,7 @@ function update() {
         draw();
     }
 
-    // call the function again on next frame
-    requestAnimationFrame(update);
+    // Game loop continues via Sprig's afterInput system
 }
 
 

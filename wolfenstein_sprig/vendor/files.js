@@ -1,27 +1,3 @@
-/**
- * DataView containing the data from VSWAP.WL6
- * @type {DataView}
- */
-let VSWAP;
-/**
- * ArrayBuffers containing the data from MAPHEAD.WL6 and GAMEMAPS.WL6
- * @type {ArrayBuffer}
- */
-let MAPHEAD, GAMEMAPS;
-/**
- * Offset in the VSWAP.WL6 file where the first wall texture starts
- * @type {number}
- */
-let wallTexturesOffset;
-/**
- * DataViews of the level data from GAMEMAPS.WL6
- * @type {DataView}
- */
-let plane0, plane1;
-/**
- * 2D array indicating if each cell of the map is blocking or not
- */
-let plane2;
 
 /**
  * Decode a RLEW-encoded sequence of bytes
@@ -116,7 +92,7 @@ function carmackDecode(inView) {
 function loadBytes(url) {
     const byteArray = EMBED_BYTES[url]
     if (!byteArray) return Promise.reject(new Error("Failed to find embed. Ensure embed_wl6.js script is run first."))
-    return Promise.resolve(arrayBuffer.buffer)
+    return Promise.resolve(byteArray.buffer)
 }
 
 

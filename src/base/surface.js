@@ -265,9 +265,8 @@ class Drawer {
 
     for (let yi = y; yi < yEnd; yi++) {
         for (let xi = x; xi < xEnd; xi++) {
-            let indexBuffer = this._getBufferIndex(xi, yi)
             let indexSprite = (xi - x) + (yi - y) * sprite.width
-            this.buffer.setChar(indexBuffer, sprite.cArray.getChar(indexSprite))
+            this.buffer.setChar(xi, yi, sprite.cArray.getChar(indexSprite))
       
         }
     }

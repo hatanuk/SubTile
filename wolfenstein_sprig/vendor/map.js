@@ -1,14 +1,4 @@
-/**
- * Canvas for drawing HUD on top of game screen
- * @type {HTMLCanvasElement}
- */
-let canvasHUD;
-/**
- * Context for HUD canvas
- * @type {CanvasRenderingContext2D}
- */
-let contextHUD;
-let shouldDrawMap = true;
+
 
 function drawMap() {
     contextHUD.clearRect(0, 0, 256, 256);
