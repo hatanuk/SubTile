@@ -10,6 +10,12 @@ Currently, the renderer supports the creation of multiple surfaces which can be 
 > **Note:** This was created as a project for [Shipwrecked](https://shipwrecked.hackclub.com/bay) to gain familiarity with JavaScript and graphical programming. You may find it helpful, but expect inefficiencies and quirks.
 > **Double Note:** Feel free to send me a message on the Hack Club Slack (hatanuk) if you need help or have questions!
 
+## Demo
+
+The demo is a simple raycaster implemented using the engine. The code is accessible in /demo and can be played on Sprig using this link:
+https://sprig.hackclub.com/share/RvsD0jBwwASx22Q4fQi4
+
+
 ## Documentation
 
 Includes information on all implemented methods and best practices:

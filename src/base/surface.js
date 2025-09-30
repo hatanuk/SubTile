@@ -266,7 +266,10 @@ class Drawer {
     for (let yi = y; yi < yEnd; yi++) {
         for (let xi = x; xi < xEnd; xi++) {
             let indexSprite = (xi - x) + (yi - y) * sprite.width
-            this.buffer.setChar(xi, yi, sprite.cArray.getChar(indexSprite))
+            // Convert palette index to character using the charMap
+            const paletteIndex = sprite.data[indexSprite]
+            const char = charMap[paletteIndex] || "."
+            this.buffer.setChar(xi, yi, char)
       
         }
     }
