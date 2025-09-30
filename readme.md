@@ -7,6 +7,15 @@ An arbitrary pixel renderer engine for the game creation platform [Sprig](https:
 The V2 build features a streamlined API, increased performance and transporability through terser allowing the engine to exist as a single line of code. 
 
 Currently, the renderer supports the creation of multiple surfaces which can be transformed, as well as the drawing of basic shapes and sprites represented as Base64 encoded RGBA arrays.
+> **Note:** This was created as a project for [Shipwrecked](https://shipwrecked.hackclub.com/bay) to gain familiarity with JavaScript and graphical programming. You may find it helpful, but expect inefficiencies and quirks.
+> **Double Note:** Feel free to send me a message on the Hack Club Slack (hatanuk) if you need help or have questions!
+
+## Documentation
+
+Includes information on all implemented methods and best practices:
+https://subtile.readthedocs.io/en/v2/index.html
+
+> Documentation, although heavily modified, was produced with the help of AI. Please alert me if there are any innacuracies.
 
 ## Quick Start
 
@@ -34,10 +43,9 @@ Currently, the renderer supports the creation of multiple surfaces which can be 
     // ^^ Renders at 1 fps
    ```
 
-   
 
-> **Note:** This was created as a project for [Shipwrecked](https://shipwrecked.hackclub.com/bay) to gain familiarity with JavaScript and graphical programming. You may find it helpful, but expect inefficiencies and quirks.
-> **Double Note:** Feel free to send me a message on the Hack Club Slack (hatanuk) if you need help or have questions!
+
+
 
 
 ---
