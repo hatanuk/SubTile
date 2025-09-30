@@ -13,7 +13,7 @@ Currently, the renderer supports the creation of multiple surfaces which can be 
 ## Demo
 
 The demo is a simple raycaster implemented using the engine. The code is accessible in /demo and can be played on Sprig using this link:
-https://sprig.hackclub.com/share/RvsD0jBwwASx22Q4fQi4
+https://sprig.hackclub.com/share/BiUKovwbfwDlqh2RMizy
 
 
 ## Documentation
