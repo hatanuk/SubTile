@@ -23,7 +23,6 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
     'sphinx.ext.githubpages',
-    'myst_parser',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -45,20 +44,6 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 
 # -- Extension configuration -------------------------------------------------
-
-# MyST Parser configuration
-myst_enable_extensions = [
-    "colon_fence",
-    "deflist",
-    "dollarmath",
-    "html_admonition",
-    "html_image",
-    "linkify",
-    "replacements",
-    "smartquotes",
-    "substitution",
-    "tasklist",
-]
 
 # Napoleon settings
 napoleon_google_docstring = True

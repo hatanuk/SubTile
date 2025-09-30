@@ -26,7 +26,6 @@ Contents:
    quickstart
    api/index
    examples
-   contributing
 
 Indices and tables
 ==================
